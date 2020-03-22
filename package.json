@@ -1,0 +1,15 @@
+{
+  "name": "websocketschat",
+  "version": "1.0.0",
+  "description": "Web sockets chat",
+  "main": "serve.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gary Allin",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "*",
+    "express": "*"
+  }
+}

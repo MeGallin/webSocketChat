@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WEb Sockets chat</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"
+    ></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+      body {
+      }
+      #messageArea {
+        display: none;
+      }
+      .border-temp {
+        border: green 2px solid;
+      }
+      .chat:nth-of-type(odd) {
+        padding: 0.3em 0;
+        border-bottom: 2px solid lightblue;
+        margin-bottom: 4px;
+        background-color: lightsalmon;
+        font-size: 1.2em;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .chat:nth-of-type(even) {
+        padding: 0.3em 0;
+        border-bottom: 2px solid lightblue;
+        margin-bottom: 4px;
+        background-color: rgba(255, 160, 122, 0.2);
+        font-size: 1.2em;
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="userFormArea" class="row">
+        <div class="col-md-12">
+          <form id="userForm">
+            <div class="form-group">
+              <label>Enter User Name</label>
+              <input class="form-control" id="username" name="" />
+              <br />
+              <input type="submit" class="btn btn-primary" value="login" />
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div id="messageArea">
+        <div class="row">
+          <div class="col-3 bg-info">
+            <h3>Online users</h3>
+            <ul class="list-group" id="users"></ul>
+          </div>
+
+          <div class="col-md border">
+            <div id="chat"><p></p></div>
+            <hr />
+            <form id="messageForm">
+              <div class="form-group">
+                <label for="message"
+                  ><span id="newUsername"></span>Enter message</label
+                >
+
+                <textarea class="form-control" id="message"> </textarea>
+                <br />
+                <input
+                  type="submit"
+                  class="btn btn-primary"
+                  value="send message"
+                />
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      $(function() {
+        var socket = io.connect();
+        var $messageForm = $('#messageForm');
+        var $message = $('#message');
+        var $chat = $('#chat');
+
+        var $messageArea = $('#messageArea');
+        var $userFormArea = $('#userFormArea');
+        var $userForm = $('#userForm');
+        var $users = $('#users');
+        var $username = $('#username');
+
+        var $newUsername = $('#newUsername');
+
+        $messageForm.submit(e => {
+          e.preventDefault();
+          socket.emit('send message', $message.val());
+          $message.val('');
+        });
+
+        socket.on('new message', data => {
+          $chat.append(
+            '<div class="chat"><strong>' +
+              data.user +
+              '</strong>: ' +
+              data.msg +
+              '</div>'
+          );
+        });
+
+        $userForm.submit(e => {
+          e.preventDefault();
+          var html = '';
+          socket.emit('new user', $username.val(), data => {
+            if (data) {
+              $userFormArea.hide();
+              $messageArea.show();
+            }
+          });
+
+          html =
+            '<span class="text-uppercase lead">' +
+            $username.val() +
+            ': ' +
+            '</span>';
+          $newUsername = $newUsername.html(html);
+          $username.val('');
+        });
+
+        socket.on('get users', data => {
+          var html = '';
+          for (let i = 0; i < data.length; i++) {
+            html += '<li class="list-group">' + data[i] + '</li>';
+          }
+          $users.html(html);
+        });
+      });
+    </script>
+  </body>
+</html>
